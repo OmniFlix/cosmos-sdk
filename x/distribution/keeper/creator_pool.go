@@ -15,7 +15,7 @@ func (k Keeper) DistributeFromCreatorPool(ctx sdk.Context, amount sdk.Coins, rec
 	// must be reduced separately from the SendCoinsFromModuleToAccount call
 	newPool, negative := creatorPool.CreatorPool.SafeSub(sdk.NewDecCoinsFromCoins(amount...))
 	if negative {
-		return types.ErrBadDistribution
+		return types.ErrBadCreatorPoolDistribution
 	}
 
 	creatorPool.CreatorPool = newPool
