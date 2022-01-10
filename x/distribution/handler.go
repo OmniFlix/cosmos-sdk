@@ -37,11 +37,14 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 	}
 }
 
-func NewCommunityPoolSpendProposalHandler(k keeper.Keeper) govtypes.Handler {
+func NewPoolSpendProposalHandler(k keeper.Keeper) govtypes.Handler {
 	return func(ctx sdk.Context, content govtypes.Content) error {
 		switch c := content.(type) {
 		case *types.CommunityPoolSpendProposal:
 			return keeper.HandleCommunityPoolSpendProposal(ctx, k, c)
+
+		case *types.CreatorPoolSpendProposal:
+			return keeper.HandleCreatorPoolSpendProposal(ctx, k, c)
 
 		default:
 			return sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "unrecognized distr proposal content type: %T", c)

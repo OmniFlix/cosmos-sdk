@@ -36,8 +36,14 @@ func (k Keeper) AllocateTokens(
 	// temporary workaround to keep CanWithdrawInvariant happy
 	// general discussions here: https://github.com/cosmos/cosmos-sdk/issues/2906#issuecomment-441867634
 	feePool := k.GetFeePool(ctx)
+	creatorPool := k.GetCreatorPool(ctx)
+	creatorReward := k.GetCreatorRewardPercentage(ctx)
 	if totalPreviousPower == 0 {
-		feePool.CommunityPool = feePool.CommunityPool.Add(feesCollected...)
+		creatorPoolReward := feesCollected.MulDecTruncate(creatorReward)
+		communityPoolReward := feesCollected.Sub(creatorPoolReward)
+		creatorPool.CreatorPool = creatorPool.CreatorPool.Add(creatorPoolReward...)
+		k.SetCreatorPool(ctx, creatorPool)
+		feePool.CommunityPool = feePool.CommunityPool.Add(communityPoolReward...)
 		k.SetFeePool(ctx, feePool)
 		return
 	}
@@ -81,7 +87,7 @@ func (k Keeper) AllocateTokens(
 
 	// calculate fraction allocated to validators
 	communityTax := k.GetCommunityTax(ctx)
-	voteMultiplier := sdk.OneDec().Sub(proposerMultiplier).Sub(communityTax)
+	voteMultiplier := sdk.OneDec().Sub(proposerMultiplier).Sub(communityTax).Sub(creatorReward)
 
 	// allocate tokens proportionally to voting power
 	// TODO consider parallelizing later, ref https://github.com/cosmos/cosmos-sdk/pull/3099#discussion_r246276376
@@ -95,10 +101,16 @@ func (k Keeper) AllocateTokens(
 		k.AllocateTokensToValidator(ctx, validator, reward)
 		remaining = remaining.Sub(reward)
 	}
+	// allocate creator pool funding
+	creatorPoolReward := feesCollected.MulDecTruncate(creatorReward)
+	creatorPool.CreatorPool = creatorPool.CreatorPool.Add(creatorPoolReward...)
+	k.SetCreatorPool(ctx, creatorPool)
+	remaining = remaining.Sub(creatorPoolReward)
 
 	// allocate community funding
 	feePool.CommunityPool = feePool.CommunityPool.Add(remaining...)
 	k.SetFeePool(ctx, feePool)
+
 }
 
 // AllocateTokensToValidator allocate tokens to a particular validator, splitting according to commission

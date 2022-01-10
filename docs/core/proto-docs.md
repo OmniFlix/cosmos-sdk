@@ -232,6 +232,9 @@
 - [cosmos/distribution/v1beta1/distribution.proto](#cosmos/distribution/v1beta1/distribution.proto)
     - [CommunityPoolSpendProposal](#cosmos.distribution.v1beta1.CommunityPoolSpendProposal)
     - [CommunityPoolSpendProposalWithDeposit](#cosmos.distribution.v1beta1.CommunityPoolSpendProposalWithDeposit)
+    - [CreatorPool](#cosmos.distribution.v1beta1.CreatorPool)
+    - [CreatorPoolSpendProposal](#cosmos.distribution.v1beta1.CreatorPoolSpendProposal)
+    - [CreatorPoolSpendProposalWithDeposit](#cosmos.distribution.v1beta1.CreatorPoolSpendProposalWithDeposit)
     - [DelegationDelegatorReward](#cosmos.distribution.v1beta1.DelegationDelegatorReward)
     - [DelegatorStartingInfo](#cosmos.distribution.v1beta1.DelegatorStartingInfo)
     - [FeePool](#cosmos.distribution.v1beta1.FeePool)
@@ -256,6 +259,8 @@
 - [cosmos/distribution/v1beta1/query.proto](#cosmos/distribution/v1beta1/query.proto)
     - [QueryCommunityPoolRequest](#cosmos.distribution.v1beta1.QueryCommunityPoolRequest)
     - [QueryCommunityPoolResponse](#cosmos.distribution.v1beta1.QueryCommunityPoolResponse)
+    - [QueryCreatorPoolRequest](#cosmos.distribution.v1beta1.QueryCreatorPoolRequest)
+    - [QueryCreatorPoolResponse](#cosmos.distribution.v1beta1.QueryCreatorPoolResponse)
     - [QueryDelegationRewardsRequest](#cosmos.distribution.v1beta1.QueryDelegationRewardsRequest)
     - [QueryDelegationRewardsResponse](#cosmos.distribution.v1beta1.QueryDelegationRewardsResponse)
     - [QueryDelegationTotalRewardsRequest](#cosmos.distribution.v1beta1.QueryDelegationTotalRewardsRequest)
@@ -1268,6 +1273,9 @@ tags are stringified and the log is JSON decoded.
 | `gas_used` | [int64](#int64) |  | Amount of gas consumed by transaction. |
 | `tx` | [google.protobuf.Any](#google.protobuf.Any) |  | The request transaction bytes. |
 | `timestamp` | [string](#string) |  | Time of the previous block. For heights > 1, it's the weighted median of the timestamps of the valid votes in the block.LastCommit. For height == 1, it's genesis time. |
+| `events` | [tendermint.abci.Event](#tendermint.abci.Event) | repeated | Events defines all the events emitted by processing a transaction. Note, these events include those emitted by processing all the messages and those emitted from the ante handler. Whereas Logs contains the events, with additional metadata, emitted only by processing the messages.
+
+Since: cosmos-sdk 0.42.11, 0.44.5, 0.45 |
 
 
 
@@ -3543,6 +3551,61 @@ with a deposit
 
 
 
+<a name="cosmos.distribution.v1beta1.CreatorPool"></a>
+
+### CreatorPool
+CreatorPool is the global creator pool for distribution.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `creator_pool` | [cosmos.base.v1beta1.DecCoin](#cosmos.base.v1beta1.DecCoin) | repeated |  |
+
+
+
+
+
+
+<a name="cosmos.distribution.v1beta1.CreatorPoolSpendProposal"></a>
+
+### CreatorPoolSpendProposal
+CreatorPoolSpendProposal details a proposal for use of creator pool funds,
+together with how many coins are proposed to be spent, and to which
+recipient account.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `title` | [string](#string) |  |  |
+| `description` | [string](#string) |  |  |
+| `recipient` | [string](#string) |  |  |
+| `amount` | [cosmos.base.v1beta1.Coin](#cosmos.base.v1beta1.Coin) | repeated |  |
+
+
+
+
+
+
+<a name="cosmos.distribution.v1beta1.CreatorPoolSpendProposalWithDeposit"></a>
+
+### CreatorPoolSpendProposalWithDeposit
+CreatorPoolSpendProposalWithDeposit defines a CreatorPoolSpendProposal
+with a deposit
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `title` | [string](#string) |  |  |
+| `description` | [string](#string) |  |  |
+| `recipient` | [string](#string) |  |  |
+| `amount` | [string](#string) |  |  |
+| `deposit` | [string](#string) |  |  |
+
+
+
+
+
+
 <a name="cosmos.distribution.v1beta1.DelegationDelegatorReward"></a>
 
 ### DelegationDelegatorReward
@@ -3606,6 +3669,7 @@ Params defines the set of params for the distribution module.
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | `community_tax` | [string](#string) |  |  |
+| `creator_reward` | [string](#string) |  |  |
 | `base_proposer_reward` | [string](#string) |  |  |
 | `bonus_proposer_reward` | [string](#string) |  |  |
 | `withdraw_addr_enabled` | [bool](#bool) |  |  |
@@ -3787,6 +3851,7 @@ GenesisState defines the distribution module's genesis state.
 | ----- | ---- | ----- | ----------- |
 | `params` | [Params](#cosmos.distribution.v1beta1.Params) |  | params defines all the paramaters of the module. |
 | `fee_pool` | [FeePool](#cosmos.distribution.v1beta1.FeePool) |  | fee_pool defines the fee pool at genesis. |
+| `creator_pool` | [CreatorPool](#cosmos.distribution.v1beta1.CreatorPool) |  | fee_pool defines the fee pool at genesis. |
 | `delegator_withdraw_infos` | [DelegatorWithdrawInfo](#cosmos.distribution.v1beta1.DelegatorWithdrawInfo) | repeated | fee_pool defines the delegator withdraw infos at genesis. |
 | `previous_proposer` | [string](#string) |  | fee_pool defines the previous proposer at genesis. |
 | `outstanding_rewards` | [ValidatorOutstandingRewardsRecord](#cosmos.distribution.v1beta1.ValidatorOutstandingRewardsRecord) | repeated | fee_pool defines the outstanding rewards of all validators at genesis. |
@@ -3923,6 +3988,33 @@ RPC method.
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | `pool` | [cosmos.base.v1beta1.DecCoin](#cosmos.base.v1beta1.DecCoin) | repeated | pool defines community pool's coins. |
+
+
+
+
+
+
+<a name="cosmos.distribution.v1beta1.QueryCreatorPoolRequest"></a>
+
+### QueryCreatorPoolRequest
+QueryCreatorPoolRequest is the request type for the Query/CreatorPool RPC
+method.
+
+
+
+
+
+
+<a name="cosmos.distribution.v1beta1.QueryCreatorPoolResponse"></a>
+
+### QueryCreatorPoolResponse
+QueryCreatorPoolResponse is the response type for the Query/CreatorPool
+RPC method.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `pool` | [cosmos.base.v1beta1.DecCoin](#cosmos.base.v1beta1.DecCoin) | repeated | pool defines creator pool's coins. |
 
 
 
@@ -4206,6 +4298,7 @@ Query defines the gRPC querier service for distribution module.
 | `DelegatorValidators` | [QueryDelegatorValidatorsRequest](#cosmos.distribution.v1beta1.QueryDelegatorValidatorsRequest) | [QueryDelegatorValidatorsResponse](#cosmos.distribution.v1beta1.QueryDelegatorValidatorsResponse) | DelegatorValidators queries the validators of a delegator. | GET|/cosmos/distribution/v1beta1/delegators/{delegator_address}/validators|
 | `DelegatorWithdrawAddress` | [QueryDelegatorWithdrawAddressRequest](#cosmos.distribution.v1beta1.QueryDelegatorWithdrawAddressRequest) | [QueryDelegatorWithdrawAddressResponse](#cosmos.distribution.v1beta1.QueryDelegatorWithdrawAddressResponse) | DelegatorWithdrawAddress queries withdraw address of a delegator. | GET|/cosmos/distribution/v1beta1/delegators/{delegator_address}/withdraw_address|
 | `CommunityPool` | [QueryCommunityPoolRequest](#cosmos.distribution.v1beta1.QueryCommunityPoolRequest) | [QueryCommunityPoolResponse](#cosmos.distribution.v1beta1.QueryCommunityPoolResponse) | CommunityPool queries the community pool coins. | GET|/cosmos/distribution/v1beta1/community_pool|
+| `CreatorPool` | [QueryCreatorPoolRequest](#cosmos.distribution.v1beta1.QueryCreatorPoolRequest) | [QueryCreatorPoolResponse](#cosmos.distribution.v1beta1.QueryCreatorPoolResponse) | CreatorPool queries the creator pool coins. | GET|/cosmos/distribution/v1beta1/creator_pool|
 
  <!-- end services -->
 

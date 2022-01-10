@@ -6,7 +6,10 @@ import (
 	govclient "github.com/cosmos/cosmos-sdk/x/gov/client"
 )
 
-// ProposalHandler is the community spend proposal handler.
 var (
-	ProposalHandler = govclient.NewProposalHandler(cli.GetCmdSubmitProposal, rest.ProposalRESTHandler)
+	// CommunityPoolSpendProposalHandler is the community spend proposal handler.
+	CommunityPoolSpendProposalHandler = govclient.NewProposalHandler(cli.GetCmdCommunityPoolSpendSubmitProposal, rest.ProposalRESTHandler)
+
+	// CreatorPoolSpendProposalHandler is the creator spend proposal handler.
+	CreatorPoolSpendProposalHandler = govclient.NewProposalHandler(cli.GetCmdCreatorPoolSpendSubmitProposal, rest.ProposalRESTHandler)
 )

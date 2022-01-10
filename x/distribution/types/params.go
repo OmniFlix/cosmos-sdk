@@ -12,6 +12,7 @@ import (
 // Parameter keys
 var (
 	ParamStoreKeyCommunityTax        = []byte("communitytax")
+	ParamStoreKeyCreatorReward        = []byte("creatorreward")
 	ParamStoreKeyBaseProposerReward  = []byte("baseproposerreward")
 	ParamStoreKeyBonusProposerReward = []byte("bonusproposerreward")
 	ParamStoreKeyWithdrawAddrEnabled = []byte("withdrawaddrenabled")
@@ -26,6 +27,7 @@ func ParamKeyTable() paramtypes.KeyTable {
 func DefaultParams() Params {
 	return Params{
 		CommunityTax:        sdk.NewDecWithPrec(2, 2), // 2%
+		CreatorReward: sdk.NewDecWithPrec(5, 2), // 5%
 		BaseProposerReward:  sdk.NewDecWithPrec(1, 2), // 1%
 		BonusProposerReward: sdk.NewDecWithPrec(4, 2), // 4%
 		WithdrawAddrEnabled: true,
@@ -41,6 +43,7 @@ func (p Params) String() string {
 func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 	return paramtypes.ParamSetPairs{
 		paramtypes.NewParamSetPair(ParamStoreKeyCommunityTax, &p.CommunityTax, validateCommunityTax),
+		paramtypes.NewParamSetPair(ParamStoreKeyCreatorReward, &p.CreatorReward, validateCreatorReward),
 		paramtypes.NewParamSetPair(ParamStoreKeyBaseProposerReward, &p.BaseProposerReward, validateBaseProposerReward),
 		paramtypes.NewParamSetPair(ParamStoreKeyBonusProposerReward, &p.BonusProposerReward, validateBonusProposerReward),
 		paramtypes.NewParamSetPair(ParamStoreKeyWithdrawAddrEnabled, &p.WithdrawAddrEnabled, validateWithdrawAddrEnabled),
@@ -52,6 +55,11 @@ func (p Params) ValidateBasic() error {
 	if p.CommunityTax.IsNegative() || p.CommunityTax.GT(sdk.OneDec()) {
 		return fmt.Errorf(
 			"community tax should be non-negative and less than one: %s", p.CommunityTax,
+		)
+	}
+	if p.CreatorReward.IsNegative() || p.CreatorReward.GT(sdk.OneDec()) {
+		return fmt.Errorf(
+			"creator reward should be non-negative and less than one: %s", p.CreatorReward,
 		)
 	}
 	if p.BaseProposerReward.IsNegative() {
@@ -89,6 +97,24 @@ func validateCommunityTax(i interface{}) error {
 		return fmt.Errorf("community tax too large: %s", v)
 	}
 
+	return nil
+}
+
+func validateCreatorReward(i interface{}) error {
+	v, ok := i.(sdk.Dec)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if v.IsNil() {
+		return fmt.Errorf("creator reward must be not nil")
+	}
+	if v.IsNegative() {
+		return fmt.Errorf("creator reward must be positive: %s", v)
+	}
+	if v.GT(sdk.OneDec()) {
+		return fmt.Errorf("creator reward too large: %s", v)
+	}
 	return nil
 }
 

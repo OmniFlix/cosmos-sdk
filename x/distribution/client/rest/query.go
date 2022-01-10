@@ -63,6 +63,12 @@ func registerQueryRoutes(clientCtx client.Context, r *mux.Router) {
 		communityPoolHandler(clientCtx),
 	).Methods("GET")
 
+	// Get the amount held in the creator pool
+	r.HandleFunc(
+		"/distribution/creator_pool",
+		creatorPoolHandler(clientCtx),
+	).Methods("GET")
+
 }
 
 // HTTP request handler to query the total rewards balance from all delegations
@@ -258,6 +264,28 @@ func communityPoolHandler(clientCtx client.Context) http.HandlerFunc {
 		}
 
 		res, height, err := clientCtx.QueryWithData(fmt.Sprintf("custom/%s/community_pool", types.QuerierRoute), nil)
+		if rest.CheckInternalServerError(w, err) {
+			return
+		}
+
+		var result sdk.DecCoins
+		if rest.CheckInternalServerError(w, clientCtx.LegacyAmino.UnmarshalJSON(res, &result)) {
+			return
+		}
+
+		clientCtx = clientCtx.WithHeight(height)
+		rest.PostProcessResponse(w, clientCtx, result)
+	}
+}
+
+func creatorPoolHandler(clientCtx client.Context) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		clientCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, clientCtx, r)
+		if !ok {
+			return
+		}
+
+		res, height, err := clientCtx.QueryWithData(fmt.Sprintf("custom/%s/creator_pool", types.QuerierRoute), nil)
 		if rest.CheckInternalServerError(w, err) {
 			return
 		}

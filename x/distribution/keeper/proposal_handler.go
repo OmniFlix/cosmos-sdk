@@ -27,3 +27,25 @@ func HandleCommunityPoolSpendProposal(ctx sdk.Context, k Keeper, p *types.Commun
 
 	return nil
 }
+
+// HandleCreatorPoolSpendProposal is a handler for executing a passed creator spend proposal
+func HandleCreatorPoolSpendProposal(ctx sdk.Context, k Keeper, p *types.CreatorPoolSpendProposal) error {
+	if k.blockedAddrs[p.Recipient] {
+		return sdkerrors.Wrapf(sdkerrors.ErrUnauthorized, "%s is not allowed to receive external funds", p.Recipient)
+	}
+
+	recipient, addrErr := sdk.AccAddressFromBech32(p.Recipient)
+	if addrErr != nil {
+		return addrErr
+	}
+
+	err := k.DistributeFromCreatorPool(ctx, p.Amount, recipient)
+	if err != nil {
+		return err
+	}
+
+	logger := k.Logger(ctx)
+	logger.Info("transferred from the creator pool to recipient", "amount", p.Amount.String(), "recipient", p.Recipient)
+
+	return nil
+}

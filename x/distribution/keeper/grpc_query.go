@@ -248,3 +248,11 @@ func (k Keeper) CommunityPool(c context.Context, req *types.QueryCommunityPoolRe
 
 	return &types.QueryCommunityPoolResponse{Pool: pool}, nil
 }
+
+// CreatorPool queries the creator pool coins
+func (k Keeper) CreatorPool(c context.Context, req *types.QueryCreatorPoolRequest) (*types.QueryCreatorPoolResponse, error) {
+	ctx := sdk.UnwrapSDKContext(c)
+	pool := k.GetCreatorPoolCoins(ctx)
+
+	return &types.QueryCreatorPoolResponse{Pool: pool}, nil
+}

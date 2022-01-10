@@ -54,11 +54,29 @@ func (k Keeper) GetFeePool(ctx sdk.Context) (feePool types.FeePool) {
 	return
 }
 
+// get the global creator pool distribution info
+func (k Keeper) GetCreatorPool(ctx sdk.Context) (creatorPool types.CreatorPool) {
+	store := ctx.KVStore(k.storeKey)
+	b := store.Get(types.CreatorPoolKey)
+	if b == nil {
+		panic("Stored creator pool should not have been nil")
+	}
+	k.cdc.MustUnmarshal(b, &creatorPool)
+	return
+}
+
 // set the global fee pool distribution info
 func (k Keeper) SetFeePool(ctx sdk.Context, feePool types.FeePool) {
 	store := ctx.KVStore(k.storeKey)
 	b := k.cdc.MustMarshal(&feePool)
 	store.Set(types.FeePoolKey, b)
+}
+
+// set the global creator pool distribution info
+func (k Keeper) SetCreatorPool(ctx sdk.Context, creatorPool types.CreatorPool) {
+	store := ctx.KVStore(k.storeKey)
+	b := k.cdc.MustMarshal(&creatorPool)
+	store.Set(types.CreatorPoolKey, b)
 }
 
 // GetPreviousProposerConsAddr returns the proposer consensus address for the

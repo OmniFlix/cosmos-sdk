@@ -12,6 +12,7 @@ func (k Keeper) InitGenesis(ctx sdk.Context, data types.GenesisState) {
 	var moduleHoldings sdk.DecCoins
 
 	k.SetFeePool(ctx, data.FeePool)
+	k.SetCreatorPool(ctx, data.CreatorPool)
 	k.SetParams(ctx, data.Params)
 
 	for _, dwi := range data.DelegatorWithdrawInfos {
@@ -87,6 +88,7 @@ func (k Keeper) InitGenesis(ctx sdk.Context, data types.GenesisState) {
 	}
 
 	moduleHoldings = moduleHoldings.Add(data.FeePool.CommunityPool...)
+	moduleHoldings = moduleHoldings.Add(data.CreatorPool.CreatorPool...)
 	moduleHoldingsInt, _ := moduleHoldings.TruncateDecimal()
 
 	// check if the module account exists
@@ -107,6 +109,7 @@ func (k Keeper) InitGenesis(ctx sdk.Context, data types.GenesisState) {
 // ExportGenesis returns a GenesisState for a given context and keeper.
 func (k Keeper) ExportGenesis(ctx sdk.Context) *types.GenesisState {
 	feePool := k.GetFeePool(ctx)
+	creatorPool := k.GetCreatorPool(ctx)
 	params := k.GetParams(ctx)
 
 	dwi := make([]types.DelegatorWithdrawInfo, 0)
@@ -190,5 +193,5 @@ func (k Keeper) ExportGenesis(ctx sdk.Context) *types.GenesisState {
 		},
 	)
 
-	return types.NewGenesisState(params, feePool, dwi, pp, outstanding, acc, his, cur, dels, slashes)
+	return types.NewGenesisState(params, feePool, creatorPool, dwi, pp, outstanding, acc, his, cur, dels, slashes)
 }

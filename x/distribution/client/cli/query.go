@@ -31,6 +31,7 @@ func GetQueryCmd() *cobra.Command {
 		GetCmdQueryValidatorSlashes(),
 		GetCmdQueryDelegatorRewards(),
 		GetCmdQueryCommunityPool(),
+		GetCmdQueryCreatorPool(),
 	)
 
 	return distQueryCmd
@@ -308,6 +309,41 @@ $ %s query distribution community-pool
 			queryClient := types.NewQueryClient(clientCtx)
 
 			res, err := queryClient.CommunityPool(cmd.Context(), &types.QueryCommunityPoolRequest{})
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+// GetCmdQueryCreatorPool returns the command for fetching creator pool info.
+func GetCmdQueryCreatorPool() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "creator-pool",
+		Args:  cobra.NoArgs,
+		Short: "Query the amount of coins in the creator pool",
+		Long: strings.TrimSpace(
+			fmt.Sprintf(`Query all coins in the creator pool which is under Governance control.
+
+Example:
+$ %s query distribution creator-pool
+`,
+				version.AppName,
+			),
+		),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+			queryClient := types.NewQueryClient(clientCtx)
+
+			res, err := queryClient.CreatorPool(cmd.Context(), &types.QueryCreatorPoolRequest{})
 			if err != nil {
 				return err
 			}

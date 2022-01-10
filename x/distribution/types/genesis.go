@@ -6,7 +6,7 @@ import (
 
 //nolint:interfacer
 func NewGenesisState(
-	params Params, fp FeePool, dwis []DelegatorWithdrawInfo, pp sdk.ConsAddress, r []ValidatorOutstandingRewardsRecord,
+	params Params, fp FeePool, cp CreatorPool, dwis []DelegatorWithdrawInfo, pp sdk.ConsAddress, r []ValidatorOutstandingRewardsRecord,
 	acc []ValidatorAccumulatedCommissionRecord, historical []ValidatorHistoricalRewardsRecord,
 	cur []ValidatorCurrentRewardsRecord, dels []DelegatorStartingInfoRecord, slashes []ValidatorSlashEventRecord,
 ) *GenesisState {
@@ -14,6 +14,7 @@ func NewGenesisState(
 	return &GenesisState{
 		Params:                          params,
 		FeePool:                         fp,
+		CreatorPool:                     cp,
 		DelegatorWithdrawInfos:          dwis,
 		PreviousProposer:                pp.String(),
 		OutstandingRewards:              r,
@@ -29,6 +30,7 @@ func NewGenesisState(
 func DefaultGenesisState() *GenesisState {
 	return &GenesisState{
 		FeePool:                         InitialFeePool(),
+		CreatorPool:                     InitialCreatorPool(),
 		Params:                          DefaultParams(),
 		DelegatorWithdrawInfos:          []DelegatorWithdrawInfo{},
 		PreviousProposer:                "",
@@ -46,5 +48,8 @@ func ValidateGenesis(gs *GenesisState) error {
 	if err := gs.Params.ValidateBasic(); err != nil {
 		return err
 	}
-	return gs.FeePool.ValidateGenesis()
+	if err := gs.FeePool.ValidateGenesis(); err != nil {
+		return err
+	}
+	return gs.CreatorPool.ValidateGenesis()
 }

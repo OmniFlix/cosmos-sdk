@@ -46,7 +46,7 @@ func TestProposalHandlerPassed(t *testing.T) {
 	app.DistrKeeper.SetFeePool(ctx, feePool)
 
 	tp := testProposal(recipient, amount)
-	hdlr := distribution.NewCommunityPoolSpendProposalHandler(app.DistrKeeper)
+	hdlr := distribution.NewPoolSpendProposalHandler(app.DistrKeeper)
 	require.NoError(t, hdlr(ctx, tp))
 
 	balances = app.BankKeeper.GetAllBalances(ctx, recipient)
@@ -64,7 +64,58 @@ func TestProposalHandlerFailed(t *testing.T) {
 	require.True(t, app.BankKeeper.GetAllBalances(ctx, account.GetAddress()).IsZero())
 
 	tp := testProposal(recipient, amount)
-	hdlr := distribution.NewCommunityPoolSpendProposalHandler(app.DistrKeeper)
+	hdlr := distribution.NewPoolSpendProposalHandler(app.DistrKeeper)
+	require.Error(t, hdlr(ctx, tp))
+
+	balances := app.BankKeeper.GetAllBalances(ctx, recipient)
+	require.True(t, balances.IsZero())
+}
+
+func testCreatorPoolSpendProposal(recipient sdk.AccAddress, amount sdk.Coins) *types.CreatorPoolSpendProposal {
+	return types.NewCreatorPoolSpendProposal("Test", "description", recipient, amount)
+}
+
+func TestCreatorPoolSpendProposalHandlerPassed(t *testing.T) {
+	app := simapp.Setup(false)
+	ctx := app.BaseApp.NewContext(false, tmproto.Header{})
+
+	recipient := delAddr1
+
+	// add coins to the module account
+	macc := app.DistrKeeper.GetDistributionAccount(ctx)
+	balances := app.BankKeeper.GetAllBalances(ctx, macc.GetAddress())
+	require.NoError(t, simapp.FundModuleAccount(app.BankKeeper, ctx, macc.GetName(), amount))
+
+	app.AccountKeeper.SetModuleAccount(ctx, macc)
+
+	account := app.AccountKeeper.NewAccountWithAddress(ctx, recipient)
+	app.AccountKeeper.SetAccount(ctx, account)
+	require.True(t, app.BankKeeper.GetAllBalances(ctx, account.GetAddress()).IsZero())
+
+	creatorPool := app.DistrKeeper.GetCreatorPool(ctx)
+	creatorPool.CreatorPool = sdk.NewDecCoinsFromCoins(amount...)
+	app.DistrKeeper.SetCreatorPool(ctx, creatorPool)
+
+	tp := testCreatorPoolSpendProposal(recipient, amount)
+	hdlr := distribution.NewPoolSpendProposalHandler(app.DistrKeeper)
+	require.NoError(t, hdlr(ctx, tp))
+
+	balances = app.BankKeeper.GetAllBalances(ctx, recipient)
+	require.Equal(t, balances, amount)
+}
+
+func TestCreatorPoolSpendProposalHandlerFailed(t *testing.T) {
+	app := simapp.Setup(false)
+	ctx := app.BaseApp.NewContext(false, tmproto.Header{})
+
+	recipient := delAddr1
+
+	account := app.AccountKeeper.NewAccountWithAddress(ctx, recipient)
+	app.AccountKeeper.SetAccount(ctx, account)
+	require.True(t, app.BankKeeper.GetAllBalances(ctx, account.GetAddress()).IsZero())
+
+	tp := testCreatorPoolSpendProposal(recipient, amount)
+	hdlr := distribution.NewPoolSpendProposalHandler(app.DistrKeeper)
 	require.Error(t, hdlr(ctx, tp))
 
 	balances := app.BankKeeper.GetAllBalances(ctx, recipient)

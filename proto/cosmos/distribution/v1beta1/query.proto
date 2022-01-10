@@ -62,6 +62,11 @@ service Query {
   rpc CommunityPool(QueryCommunityPoolRequest) returns (QueryCommunityPoolResponse) {
     option (google.api.http).get = "/cosmos/distribution/v1beta1/community_pool";
   }
+
+  // CreatorPool queries the creator pool coins.
+  rpc CreatorPool(QueryCreatorPoolRequest) returns (QueryCreatorPoolResponse) {
+    option (google.api.http).get = "/cosmos/distribution/v1beta1/creator_pool";
+  }
 }
 
 // QueryParamsRequest is the request type for the Query/Params RPC method.
@@ -215,4 +220,16 @@ message QueryCommunityPoolResponse {
   // pool defines community pool's coins.
   repeated cosmos.base.v1beta1.DecCoin pool = 1
       [(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins", (gogoproto.nullable) = false];
+}
+
+// QueryCreatorPoolRequest is the request type for the Query/CreatorPool RPC
+// method.
+message QueryCreatorPoolRequest {}
+
+// QueryCreatorPoolResponse is the response type for the Query/CreatorPool
+// RPC method.
+message QueryCreatorPoolResponse {
+  // pool defines creator pool's coins.
+  repeated cosmos.base.v1beta1.DecCoin pool = 1
+  [(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins", (gogoproto.nullable) = false];
 }

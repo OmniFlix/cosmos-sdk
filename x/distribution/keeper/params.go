@@ -22,6 +22,12 @@ func (k Keeper) GetCommunityTax(ctx sdk.Context) (percent sdk.Dec) {
 	return percent
 }
 
+// GetCreatorRewardPercentage returns the current distribution of creator pool.
+func (k Keeper) GetCreatorRewardPercentage(ctx sdk.Context) (percent sdk.Dec) {
+	k.paramSpace.Get(ctx, types.ParamStoreKeyCommunityTax, &percent)
+	return percent
+}
+
 // GetBaseProposerReward returns the current distribution base proposer rate.
 func (k Keeper) GetBaseProposerReward(ctx sdk.Context) (percent sdk.Dec) {
 	k.paramSpace.Get(ctx, types.ParamStoreKeyBaseProposerReward, &percent)

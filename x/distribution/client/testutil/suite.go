@@ -730,7 +730,24 @@ func (s *IntegrationTestSuite) TestGetCmdSubmitProposal() {
 		tc := tc
 
 		s.Run(tc.name, func() {
-			cmd := cli.GetCmdSubmitProposal()
+			cmd := cli.GetCmdCreatorPoolSpendSubmitProposal()
+			clientCtx := val.ClientCtx
+			flags.AddTxFlagsToCmd(cmd)
+
+			out, err := clitestutil.ExecTestCLICmd(clientCtx, cmd, tc.args)
+			if tc.expectErr {
+				s.Require().Error(err)
+			} else {
+				s.Require().NoError(err)
+				s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), tc.respType), out.String())
+
+				txResp := tc.respType.(*sdk.TxResponse)
+				s.Require().Equal(tc.expectedCode, txResp.Code, out.String())
+			}
+		})
+
+		s.Run(tc.name, func() {
+			cmd := cli.GetCmdCommunityPoolSpendSubmitProposal()
 			clientCtx := val.ClientCtx
 			flags.AddTxFlagsToCmd(cmd)
 
